@@ -1,15 +1,13 @@
 # -*- coding: utf-8 -*-
 # @Author: Qilong Pan
-# @Date:   2018-07-18 08:03:25
+# @Date:   2018-07-18 11:20:40
 # @Last Modified by:   Qilong Pan
-# @Last Modified time: 2018-07-18 10:59:33
-
+# @Last Modified time: 2018-07-18 13:33:34
 '''
-use to solve binary classification problems
+linear regression
 '''
-from functools import reduce
 
-class Sensor(object):
+class LinearRegression(object):
 	def __init__(self,features,activator):
 		self.activator = activator
 		self.weights = [0.0 for _ in range(features)]
@@ -22,17 +20,15 @@ class Sensor(object):
 	def predict_data(self,data):
 		labelValue = self.bias
 		for i in range(len(data)):
-			labelValue = labelValue + data[i] * list(self.weights)[i]
+			labelValue = labelValue + data[i] * self.weights[i]
 		return self.activator(labelValue)
-
 	'''
 	use Ordinary Least Squares as loss function
 	'''
 	def update_weights_bias(self,data,predictLabel,label,lr):
 		delta = label - predictLabel
-		self.weights = list(map(
-			lambda x: x[1] + lr * delta * x[0],
-			zip(data,self.weights)))
+		for i in range(len(self.weights)):
+			self.weights[i] = self.weights[i] + lr * delta * data[i]
 		self.bias += lr * delta
 
 	def one_iteration(self,train_data,labels,lr):
@@ -45,41 +41,41 @@ class Sensor(object):
 	print object.default transfer
 	'''
 	def __str__(self):
-		return "weights\t:%s\nbias\t:%f\n" %(self.weights,self.bias)
-
+		return "weights\t:%s\nbias\t:%f\n" %(self.weights,self.bias)	
 
 '''
 step function as activator function
 '''
 def activator_fn(x):
-	return 1 if x > 0 else 0
+	return x
 
-#return and operation train data
-def getDataSet():
-	train_data = [
-		[0,0],
-		[0,1],
-		[1,0],
-		[1,1]
-		]
-	labels = [0,0,0,1]
-	return train_data,labels
+'''
+init data
+'''
+def get_dataset():
+	train_datas = [
+		[1],
+		[2],
+		[3],
+		[4],
+		[5]
+	]
+	labels = [210,410,610,810,1010]
+	return train_datas,labels
 
 def train_and_operation():
-	train_data,labels = getDataSet()
+	train_data,labels = get_dataset()
 	if len(train_data) < 0 :
 		return "no data"
 	else:
-		sensor = Sensor(len(train_data[0]),activator_fn)
-		sensor.train(train_data,labels,10,0.1)
-		return sensor
+		linearRegression = LinearRegression(len(train_data[0]),activator_fn)
+		linearRegression.train(train_data,labels,100000,0.01)
+		return linearRegression
+
+def train_data():
+	train_datas, labels = get_dataset()
 
 if __name__ == "__main__":
-	sensor = train_and_operation()
-	print(sensor)
-	print('[0,0]-> %d' %(sensor.predict_data([0,0])))
-	print('[0,1]-> %d' %(sensor.predict_data([0,1])))
-	print('[1,0]-> %d' %(sensor.predict_data([1,0])))
-	print('[1,1]-> %d' %(sensor.predict_data([1,1])))
-
-
+	linearRegression = train_and_operation()
+	print(linearRegression)
+	print('Work 3.4 years,monthly salary = %.2f' %(linearRegression.predict_data([6])))
