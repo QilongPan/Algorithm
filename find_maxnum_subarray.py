@@ -2,7 +2,7 @@
 # @Author: Qilong Pan
 # @Date:   2018-07-19 18:06:14
 # @Last Modified by:   Qilong Pan
-# @Last Modified time: 2018-07-19 20:36:55
+# @Last Modified time: 2018-07-19 20:46:33
 # Find the largest subarray
 
 def find_max_corrsing_subarray(arr,low,mid,high):
@@ -40,7 +40,7 @@ def find_maximum_subarray(arr,low,high):
 			return cross_low,cross_high,cross_sum
 
 if __name__ == "__main__":
-	arr = [13,-3,-25,20,-3,-16,-23,-12,24,-23,24,18,-50,20,-7,12,-5,-22,15,-4,7]
+	arr = [13,53,-25,20,-12,-5,-22,15,-4,7]
 	start_index,end_index,max_sum = find_maximum_subarray(arr,0,len(arr)-1)
 	print("start index:%d\t\tmax sum is %d" %(start_index,max_sum))
 
