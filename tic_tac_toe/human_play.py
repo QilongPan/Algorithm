@@ -2,11 +2,12 @@
 # @Author: Qilong Pan
 # @Date:   2018-07-20 10:10:57
 # @Last Modified by:   Qilong Pan
-# @Last Modified time: 2018-07-20 13:04:59
+# @Last Modified time: 2018-07-26 07:42:31
 #
 from __future__ import print_function
 from game import Board,Game
 from mcts_alphaZero import MCTSPlayer
+
 class Human(object):
 	#player is human tag
 	def __init__(self):
@@ -32,9 +33,9 @@ def run(row,column,win_piece_num,start_player):
 	board = Board(row = row,column = column,win_piece_num = win_piece_num)
 	game = Game(board)
 	human = Human()
-#	mcts_player = MCTSPlayer()
-	human2 = Human()
-	game.start_play(human,human2,start_player,is_shown = 1)
+	mcts_player = MCTSPlayer()
+#	human2 = Human()
+	game.start_play(human,mcts_player,start_player,is_shown = 1)
 
 
 if __name__ == '__main__':
