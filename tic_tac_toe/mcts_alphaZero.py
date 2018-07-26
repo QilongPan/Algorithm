@@ -2,7 +2,7 @@
 # @Author: Qilong Pan
 # @Date:   2018-07-20 10:31:13
 # @Last Modified by:   Qilong Pan
-# @Last Modified time: 2018-07-26 08:55:00
+# @Last Modified time: 2018-07-26 19:18:39
 
 import random
 import math
@@ -25,19 +25,22 @@ class MCTS(object):
 		self.board = board
 		self.player_id = player_id
 		self.root = TreeNode(-1)
+		self.simulation_result = None
 
 	def search(self):
 		while self.current_simulation_number < self.all_simulation_number:
 			self.one_simulation(self.root)
 			self.current_simulation_number += 1
+		for i in range(len(self.root.child)):
+			if self.root.child[i].visits > 0:
+				print("move:%d\tvisits:%f" %(self.root.child[i].move,self.root.child[i].win/self.root.child[i].visits))
 		return self.root.best_move
 
 	def one_simulation(self,root):
 		win,winner = self.board.game_end()
-		simulation_result = winner
 		if not win:
 			if root.visits == 0:
-				simulation_result = self.random_play_game()
+				self.simulation_result = self.random_play_game()
 			else:
 				if len(root.child) == 0:
 					self.create_child(root)
@@ -49,8 +52,10 @@ class MCTS(object):
 					self.make_move(next_child.move)
 					self.one_simulation(next_child)
 					self.unmake_move(next_child.move,last_move)
+		else:
+			self.simulation_result = winner
 		root.visits += 1
-		self.update_win(root,simulation_result)
+		self.update_win(root,self.simulation_result)
 		if len(root.child) != 0:
 			self.set_best_child(root)
 
@@ -77,7 +82,7 @@ class MCTS(object):
 			self.board.availables.append(moves[i])
 			self.board.states.pop(moves[i])
 		self.board.current_player = current_player
-		self.last_move = last_move
+		self.board.last_move = last_move
 		return winner
 
 
@@ -85,6 +90,8 @@ class MCTS(object):
 		uct_value = 0
 		best_value = -1
 		best_child = -1
+		if len(root.child) == 0:
+			print("select no child")
 		for i in range(len(root.child)):
 			if root.child[i].visits > 0:
 				win_rate = root.child[i].win / root.child[i].visits
@@ -107,7 +114,10 @@ class MCTS(object):
 
 	def unmake_move(self,move,last_move):
 		self.board.availables.append(move)
-		self.board.current_player = self.board.current_player % 2 + 1
+		self.board.current_player = (
+			self.board.players[0] if self.board.current_player == self.board.players[1]
+			else self.board.players[1]
+			)
 		self.board.last_move = last_move
 		self.board.states.pop(move)
 
@@ -129,7 +139,7 @@ class MCTS(object):
 
 
 class MCTSPlayer(object):
-	def __init__(self,n_simulations = 100):
+	def __init__(self,n_simulations = 1000):
 		self.n_simulations = n_simulations
 		self.player = None
 
