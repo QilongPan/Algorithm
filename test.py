@@ -2,11 +2,10 @@
 # @Author: Qilong Pan
 # @Date:   2018-07-16 14:30:49
 # @Last Modified by:   Qilong Pan
-# @Last Modified time: 2018-07-26 10:13:15
+# @Last Modified time: 2018-07-27 17:57:51
 
 import time
 import random
 import math
-tel = {1: 4098, 2: 4139}
-tel.pop(2)
-print(tel)
+
+print(math.ceil(7/2))
