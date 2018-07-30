@@ -2,7 +2,7 @@
 # @Author: Qilong Pan
 # @Date:   2018-07-20 10:02:47
 # @Last Modified by:   Qilong Pan
-# @Last Modified time: 2018-07-26 17:16:25
+# @Last Modified time: 2018-07-30 20:31:16
 from __future__ import print_function
 import numpy as np 
 
@@ -43,6 +43,13 @@ class Board(object):
 		if move not in range(self.row * self.column):
 			return -1
 		return move
+
+	def current_state(self):
+		state = np.zeros(self.row * self.column)
+		if self.states:
+			for key,value in self.states.items():
+				state[key] = value
+		return state
 
 	def do_move(self,move):
 		self.states[move] = self.current_player
@@ -159,6 +166,34 @@ class Game(object):
 					else:
 						print("Game end. Tie")
 				return winner
+
+	def start_self_play(self,player1,player2,start_player = 0,is_shown = 0):
+		self.board.init_board()
+		p1,p2 = self.board.players
+		player1.set_player_ind(p1)
+		player2.set_player_ind(p2)
+		players {p1:player1,p2:player2}
+		if is_shown:
+			self.graphic(self.board,p1,p2)
+		states = []
+		while True:
+			current_player = self.board.get_current_player()
+			player_in_turn = players[current_player]
+			move = player_in_turn.get_action(self.board)
+			states.append(self.board.current_state())
+			self.board.do_move(move)
+			if is_shown:
+				self.graphic(self.board,p1,p2)
+			end,winner = self.board.game_end()
+			if end:
+				y = []
+				for i in range(len(states)):
+					y.append(winner)
+		return states,y
+
+
+
+
 
 
 
