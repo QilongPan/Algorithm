@@ -2,7 +2,7 @@
 # @Author: Qilong Pan
 # @Date:   2018-07-20 10:02:47
 # @Last Modified by:   Qilong Pan
-# @Last Modified time: 2018-07-31 20:28:23
+# @Last Modified time: 2018-08-01 07:36:37
 from __future__ import print_function
 import numpy as np 
 import random
@@ -171,7 +171,6 @@ class Game(object):
 
 	def start_self_play(self,player1,player2,start_player = 0,is_shown = 0):
 		start_player = random.randint(0,1)
-		print("start player %d"%(start_player))
 		self.board.init_board(start_player)
 		p1,p2 = self.board.players
 		player1.set_player_ind(p1)
@@ -185,17 +184,23 @@ class Game(object):
 			player_in_turn = players[current_player]
 			move = player_in_turn.get_action(self.board)
 			states.append(self.board.current_state())
-			print("enter%d"%(move))
 			self.board.do_move(move)
 			if is_shown:
 				self.graphic(self.board,p1,p2)
 			end,winner = self.board.game_end()
 			if end:
 				states.append(self.board.current_state())
-				y = []
+				y = [0,0,0]
+				ys = []
 				for i in range(len(states)):
-					y.append(winner)
-				return states,y
+					if winner == -1:
+						y[0] = -1
+					elif winner == 1:
+						y[1] = 1
+					else:
+						y[2] = 2
+					ys.append(y)
+				return states,ys
 
 
 

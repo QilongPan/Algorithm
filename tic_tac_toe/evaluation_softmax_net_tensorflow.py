@@ -2,7 +2,7 @@
 # @Author: Qilong Pan
 # @Date:   2018-07-30 19:02:14
 # @Last Modified by:   Qilong Pan
-# @Last Modified time: 2018-07-31 20:53:12
+# @Last Modified time: 2018-08-01 08:09:07
 
 import tensorflow as tf
 import numpy as np 
@@ -17,16 +17,17 @@ class EvaluationValueNet(object):
 		self.board = Board(row = self.board_height,column = self.board_width,win_piece_num = self.win_piece_num)
 		self.game = Game(self.board)
 		self.x = tf.placeholder("float",[None,self.board_width * self.board_height])
-		self.W = tf.Variable(tf.zeros([self.board_height*self.board_width,1]))
+		self.W = tf.Variable(tf.zeros([self.board_height*self.board_width,3]))
 		self.b = tf.Variable(tf.zeros([3]))
 		self.y = tf.matmul(self.x,self.W) + self.b
-	#	self.y = tf.nn.softmax(tf.matmul(self.x,self.W) + self.b)
-		self.y_ = tf.placeholder("float",[None,1])
+		self.y = tf.nn.softmax(tf.matmul(self.x,self.W) + self.b)
+		self.y_ = tf.placeholder("float",[None,3])
 		self.cross_entropy = -tf.reduce_sum(self.y_ * tf.log(self.y))
 		self.train_step = tf.train.GradientDescentOptimizer(0.01).minimize(self.cross_entropy)
 		self.session = tf.Session()
 		self.init = tf.global_variables_initializer()
 		self.session.run(self.init)
+		self.saver = tf.train.Saver()
 		'''
 		self.saver = tf.train.Saver()
 		if model_file is not None:
@@ -58,8 +59,18 @@ class EvaluationValueNet(object):
 	def trainStep(self):
 			train_x,train_y = self.collect_selfplay_data()
 			train_x = np.array(train_x)
-			train_y = np.array(train_y).reshape(len(train_x),1)
-			self.session.run(self.train_step,feed_dict = {self.x:train_x,self.y_:train_y})
+			train_y = np.array(train_y).reshape(len(train_x),3)
+			self.session.run([self.y],feed_dict = {self.x:train_x,self.y_:train_y})
+			self.save_model('./current_policy.model')
+	def predict(self):
+		self.restore_model("./current_policy.model")
+		train_x,train_y = self.collect_selfplay_data()
+		train_x = np.array(train_x)
+		train_y = np.array(train_y).reshape(len(train_x),3)
+		print(train_x)
+		print(train_y)
+		print(self.session.run(self.y,feed_dict = {self.x:train_x}))
+
 	def save_model(self,model_path):
 		self.saver.save(self.session,model_path)
 
