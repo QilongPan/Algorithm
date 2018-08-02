@@ -2,7 +2,7 @@
 # @Author: Qilong Pan
 # @Date:   2018-07-20 10:31:13
 # @Last Modified by:   Qilong Pan
-# @Last Modified time: 2018-07-31 07:43:02
+# @Last Modified time: 2018-08-02 08:01:40
 
 import random
 import math
@@ -31,14 +31,6 @@ class MCTS(object):
 		while self.current_simulation_number < self.all_simulation_number:
 			self.one_simulation(self.root)
 			self.current_simulation_number += 1
-		print("**************")
-		'''
-		for i in range(len(self.root.child)):
-			if self.root.child[i].visits > 0:
-				print("move:%d\tvisits:%f" %(self.root.child[i].move,self.root.child[i].win/self.root.child[i].visits))
-		'''
-		print(self.board.states)
-		print("best%d"%(self.root.best_move))
 		return self.root.best_move
 
 	def one_simulation(self,root):

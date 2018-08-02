@@ -2,7 +2,7 @@
 # @Author: Qilong Pan
 # @Date:   2018-07-30 19:02:14
 # @Last Modified by:   Qilong Pan
-# @Last Modified time: 2018-08-01 08:09:07
+# @Last Modified time: 2018-08-02 08:12:42
 
 import tensorflow as tf
 import numpy as np 
@@ -23,7 +23,7 @@ class EvaluationValueNet(object):
 		self.y = tf.nn.softmax(tf.matmul(self.x,self.W) + self.b)
 		self.y_ = tf.placeholder("float",[None,3])
 		self.cross_entropy = -tf.reduce_sum(self.y_ * tf.log(self.y))
-		self.train_step = tf.train.GradientDescentOptimizer(0.01).minimize(self.cross_entropy)
+		self.train_step = tf.train.GradientDescentOptimizer(0.001).minimize(self.cross_entropy)
 		self.session = tf.Session()
 		self.init = tf.global_variables_initializer()
 		self.session.run(self.init)
@@ -56,12 +56,14 @@ class EvaluationValueNet(object):
 			self.game.board.init_board()
 		return states,winners
 
-	def trainStep(self):
+	def trainStep(self,game_batch_num):
+		for i in range(game_batch_num):
 			train_x,train_y = self.collect_selfplay_data()
 			train_x = np.array(train_x)
 			train_y = np.array(train_y).reshape(len(train_x),3)
-			self.session.run([self.y],feed_dict = {self.x:train_x,self.y_:train_y})
-			self.save_model('./current_policy.model')
+			y,loss = self.session.run([self.y,self.cross_entropy],feed_dict = {self.x:train_x,self.y_:train_y})
+			print(loss)
+		self.save_model('./current_policy.model')		
 	def predict(self):
 		self.restore_model("./current_policy.model")
 		train_x,train_y = self.collect_selfplay_data()
