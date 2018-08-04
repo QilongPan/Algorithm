@@ -2,7 +2,7 @@
 # @Author: Qilong Pan
 # @Date:   2018-07-30 19:02:14
 # @Last Modified by:   Qilong Pan
-# @Last Modified time: 2018-08-02 08:12:42
+# @Last Modified time: 2018-08-04 11:59:11
 
 import tensorflow as tf
 import numpy as np 
@@ -16,33 +16,24 @@ class EvaluationValueNet(object):
 		self.win_piece_num = 3
 		self.board = Board(row = self.board_height,column = self.board_width,win_piece_num = self.win_piece_num)
 		self.game = Game(self.board)
-		self.x = tf.placeholder("float",[None,self.board_width * self.board_height])
-		self.W = tf.Variable(tf.zeros([self.board_height*self.board_width,3]))
-		self.b = tf.Variable(tf.zeros([3]))
-		self.y = tf.matmul(self.x,self.W) + self.b
-		self.y = tf.nn.softmax(tf.matmul(self.x,self.W) + self.b)
-		self.y_ = tf.placeholder("float",[None,3])
-		self.cross_entropy = -tf.reduce_sum(self.y_ * tf.log(self.y))
-		self.train_step = tf.train.GradientDescentOptimizer(0.001).minimize(self.cross_entropy)
-		self.session = tf.Session()
-		self.init = tf.global_variables_initializer()
-		self.session.run(self.init)
+		self.in_units = self.board_width * self.board_height
+		self.h1_units = 5
+		self.W1 = tf.Variable(tf.truncated_normal([self.in_units,self.h1_units],stddev = 0.1))
+		self.b1 = tf.Variable(tf.zeros([self.h1_units]))
+		self.W2 = tf.Variable(tf.zeros([self.h1_units,3]))
+		self.b2 = tf.Variable(tf.zeros([3]))
+		self.x = tf.placeholder(tf.float32,[None,self.in_units])
+		self.keep_prob = tf.placeholder(tf.float32)
+		self.hidden1 = tf.nn.relu(tf.matmul(self.x,self.W1) + self.b1)
+		self.hidden1_drop = tf.nn.dropout(self.hidden1,self.keep_prob)
+		self.y = tf.nn.softmax(tf.matmul(self.hidden1_drop,self.W2) + self.b2)
+		self.y_ = tf.placeholder(tf.float32,[None,3])
+		self.cross_entropy = tf.reduce_sum(self.y_ * tf.log(self.y))
+		self.train_step = tf.train.AdagradOptimizer(0.01).minimize(self.cross_entropy)
+		self.session = tf.InteractiveSession()
+		tf.global_variables_initializer().run()
 		self.saver = tf.train.Saver()
-		'''
-		self.saver = tf.train.Saver()
-		if model_file is not None:
-			self.restore_model(model_file)
-		
-		with tf.Session as sess:
-			sess = tf.Session()
-			sess.run(init)
-			self.saver = tf.train.Saver()
-			if model_file is not Node:
 
-			for i in range(1000):
-				train_x,train_y = self.collect_selfplay_data()
-				sess.run(train_step,feed_dict = {x:train_x,y_:train_y})
-		'''
 	def collect_selfplay_data(self,n_games = 1):
 		states = []
 		winners = []
@@ -61,17 +52,25 @@ class EvaluationValueNet(object):
 			train_x,train_y = self.collect_selfplay_data()
 			train_x = np.array(train_x)
 			train_y = np.array(train_y).reshape(len(train_x),3)
-			y,loss = self.session.run([self.y,self.cross_entropy],feed_dict = {self.x:train_x,self.y_:train_y})
-			print(loss)
-		self.save_model('./current_policy.model')		
+			self.train_step.run({self.x:train_x,self.y_:train_y,self.keep_prob:0.75})
+		self.save_model('./checkpoint_dir/MyModel')
+
 	def predict(self):
-		self.restore_model("./current_policy.model")
+		new_saver = tf.train.import_meta_graph('./checkpoint_dir/MyModel.meta')
+		new_saver.restore(self.session,tf.train.latest_checkpoint('./checkpoint_dir'))
 		train_x,train_y = self.collect_selfplay_data()
+#		train_x = [[2,0,0,2,1,0,1,0,1]]
 		train_x = np.array(train_x)
 		train_y = np.array(train_y).reshape(len(train_x),3)
 		print(train_x)
 		print(train_y)
-		print(self.session.run(self.y,feed_dict = {self.x:train_x}))
+		correct_prediction = tf.equal(tf.argmax(self.y,1),tf.argmax(self.y_,1))
+		print(self.session.run(self.y,feed_dict = {self.x:train_x,self.keep_prob:0.75}))
+		accuracy = tf.reduce_mean(tf.cast(correct_prediction,tf.float32))
+#		print(accuracy.eval({self.x:train_x,self.y_:train_y,keep_prob:1.0}))
+#		print(train_x)
+#		print(train_y)
+
 
 	def save_model(self,model_path):
 		self.saver.save(self.session,model_path)
