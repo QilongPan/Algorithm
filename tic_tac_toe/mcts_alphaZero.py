@@ -2,7 +2,7 @@
 # @Author: Qilong Pan
 # @Date:   2018-07-20 10:31:13
 # @Last Modified by:   Qilong Pan
-# @Last Modified time: 2018-08-02 08:01:40
+# @Last Modified time: 2018-08-08 18:06:21
 
 import random
 import math
@@ -31,8 +31,20 @@ class MCTS(object):
 		while self.current_simulation_number < self.all_simulation_number:
 			self.one_simulation(self.root)
 			self.current_simulation_number += 1
+		'''
+		for i in range(len(self.root.child)):
+			if self.root.child[i].visits > 0:
+				print("move",end='')
+				print(self.root.child[i].move,end='')
+				print("win:",end='')
+				print(self.root.child[i].win,end = '')
+				print("visits:",end='')
+				print(self.root.child[i].visits,end = '')
+				print("winrate:",end='')
+				print(self.root.child[i].win/self.root.child[i].visits)
+		print(self.root.best_move)
+		'''
 		return self.root.best_move
-
 	def one_simulation(self,root):
 		win,winner = self.board.game_end()
 		if not win:
@@ -80,6 +92,7 @@ class MCTS(object):
 			self.board.states.pop(moves[i])
 		self.board.current_player = current_player
 		self.board.last_move = last_move
+		self.board.availables.sort()
 		return winner
 
 
@@ -90,16 +103,19 @@ class MCTS(object):
 		if len(root.child) == 0:
 			print("select no child")
 		for i in range(len(root.child)):
+			
 			if root.child[i].visits > 0:
 				win_rate = root.child[i].win / root.child[i].visits
 				draw_rate = root.child[i].draw / root.child[i].visits
-				expose_value = 0.4 * math.sqrt(2 * math.log(root.visits)/root.child[i].visits)
+				expose_value = 1 * math.sqrt(2 * math.log(root.visits)/root.child[i].visits)
 				if self.board.current_player == self.player_id:
-					uct_value = win_rate + expose_value
+					uct_value = draw_rate + win_rate + expose_value
 				else:
-					uct_value = 1 - win_rate - draw_rate + expose_value
+					uct_value = 1 - win_rate + expose_value
 			else:
 				uct_value = 100 + random.random()
+				
+		#	uct_value = 100 + random.random()
 			if uct_value > best_value:
 				best_value = uct_value
 				best_child = root.child[i]
@@ -117,6 +133,7 @@ class MCTS(object):
 			)
 		self.board.last_move = last_move
 		self.board.states.pop(move)
+		self.board.availables.sort()
 
 	def update_win(self,root,simulation_result):
 		if simulation_result == self.player_id:
@@ -125,18 +142,19 @@ class MCTS(object):
 			root.draw += 1
 
 	def set_best_child(self,root):
-		best_value = 0
+		best_value = -1
+		best_draw_rate = -1
 		for i in range(len(root.child)):
 			if root.child[i].visits > 0 :
 				win_rate = root.child[i].win / root.child[i].visits
-				if win_rate >= best_value:
-					best_value = win_rate
+				draw_rate = root.child[i].draw / root.child[i].visits
+				if win_rate + draw_rate > best_value:
+					best_value = win_rate + draw_rate
 					root.best_move = root.child[i].move
 
 
-
 class MCTSPlayer(object):
-	def __init__(self,n_simulations = 1000):
+	def __init__(self,n_simulations = 2000):
 		self.n_simulations = n_simulations
 		self.player = None
 

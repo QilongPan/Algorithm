@@ -2,7 +2,7 @@
 # @Author: Qilong Pan
 # @Date:   2018-07-31 19:45:43
 # @Last Modified by:   Qilong Pan
-# @Last Modified time: 2018-08-04 11:59:51
+# @Last Modified time: 2018-08-08 20:09:54
 
 from __future__ import print_function
 import numpy as np 
@@ -16,14 +16,14 @@ class TrainPipeline():
 		self.win_piece_num = 3
 		self.board = Board(row = self.board_row,column = self.board_column,win_piece_num = self.win_piece_num)
 		self.game = Game(self.board)
-		self.game_batch_num = 1000
+		self.game_batch_num = 25
 		self.play_batch_num = 1
 		self.epochs = 5
 
 	def run(self):
 		policy_value_net = EvaluationValueNet(self.board_row,self.board_column)
-		policy_value_net.trainStep(self.game_batch_num)
-		policy_value_net.predict()
+#		policy_value_net.trainStep(self.game_batch_num)
+#		policy_value_net.predict()
 
 
 if __name__ == "__main__":
