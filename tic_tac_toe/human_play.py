@@ -2,7 +2,7 @@
 # @Author: Qilong Pan
 # @Date:   2018-07-20 10:10:57
 # @Last Modified by:   Qilong Pan
-# @Last Modified time: 2018-07-26 07:42:31
+# @Last Modified time: 2018-08-10 09:53:24
 #
 from __future__ import print_function
 from game import Board,Game
@@ -39,8 +39,8 @@ def run(row,column,win_piece_num,start_player):
 
 
 if __name__ == '__main__':
-	win_piece_num = 3
-	row = 3
-	column = 3
+	win_piece_num = 5
+	row = 11
+	column = 11
 	start_player = int(input("please choose first player(input 0 is human first,1 is computer first):"))
 	run(row,column,win_piece_num,start_player)

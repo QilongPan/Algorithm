@@ -2,7 +2,7 @@
 # @Author: Qilong Pan
 # @Date:   2018-07-20 10:31:13
 # @Last Modified by:   Qilong Pan
-# @Last Modified time: 2018-08-08 18:06:21
+# @Last Modified time: 2018-08-10 09:55:26
 
 import random
 import math
@@ -154,7 +154,7 @@ class MCTS(object):
 
 
 class MCTSPlayer(object):
-	def __init__(self,n_simulations = 2000):
+	def __init__(self,n_simulations = 5000):
 		self.n_simulations = n_simulations
 		self.player = None
 
