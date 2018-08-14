@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 # @Author: Qilong Pan
-# @Date:   2018-08-14 18:45:50
+# @Date:   2018-08-15 07:39:28
 # @Last Modified by:   Qilong Pan
-# @Last Modified time: 2018-08-14 20:34:30
+# @Last Modified time: 2018-08-15 07:43:37
 from math import log
 import operator
-class ID3(object):
+class C45(object):
 	def __init__(self):
 		pass
 	def calcShannonEnt(self,dataSet):
@@ -42,11 +42,14 @@ class ID3(object):
 			#remove duplicate elements
 			uniqueVals = set(featList)
 			newEntropy = 0.0
+			splitInfo = 0.0
 			for value in uniqueVals:
 				subDataSet = self.splitDataSet(dataSet,i,value)
 				prob = len(subDataSet)/float(len(dataSet))
 				newEntropy += prob * self.calcShannonEnt(subDataSet)
-			infoGain = baseEntropy - newEntropy
+				splitInfo -= prob * log(prob,2)
+			#get information gain rate.this is different id3
+			infoGain = (baseEntropy - newEntropy)/splitInfo 
 			if infoGain > bestInfoGain:
 				bestInfoGain = infoGain
 				bestFeature = i
@@ -111,6 +114,7 @@ def creatDataSet():
 	labels = ['no surfacing','flippers']
 	return dataSet,labels
 
-myDat,labels = creatDataSet()
-decisionTree = ID3()
-print(decisionTree.createTree(myDat,labels))
+if __name__ == '__main__':
+	myDat,labels = creatDataSet()
+	decisionTree = C45()
+	print(decisionTree.createTree(myDat,labels))
